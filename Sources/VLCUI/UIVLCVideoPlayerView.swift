@@ -27,7 +27,6 @@ public class UIVLCVideoPlayerView: _PlatformView {
     private let loggingInfo: (logger: VLCVideoPlayerLogger, level: VLCVideoPlayer.LoggingLevel)?
     private var currentMediaPlayer: VLCMediaPlayer?
 
-    private var hasSetCurrentConfigurationValues: Bool = false
     private var lastPlayerTicks: Int32 = 0
     private var lastPlayerState: VLCMediaPlayerState = .opening
 
@@ -101,11 +100,12 @@ public class UIVLCVideoPlayerView: _PlatformView {
         for child in newConfiguration.playbackChildren {
             newMediaPlayer.addPlaybackSlave(child.url, type: child.type.asVLCSlaveType, enforce: child.enforce)
         }
+        
+        setConfigurationValues(with: newMediaPlayer, from: newConfiguration)
 
         configuration = newConfiguration
         currentMediaPlayer = newMediaPlayer
         proxy?.mediaPlayer = newMediaPlayer
-        hasSetCurrentConfigurationValues = false
         lastPlayerTicks = 0
         lastPlayerState = .opening
 
@@ -202,11 +202,6 @@ extension UIVLCVideoPlayerView: VLCMediaPlayerDelegate {
             onStateUpdated(.playing, playbackInformation)
             lastPlayerState = .playing
             lastPlayerTicks = currentTicks
-
-            if !hasSetCurrentConfigurationValues {
-                setConfigurationValues(with: player, from: configuration)
-                hasSetCurrentConfigurationValues = true
-            }
         }
 
         // Replay
